@@ -9,28 +9,8 @@
  */
 package com.echonest.api.v4.shell;
 
-import com.echonest.api.v4.Artist;
-import com.echonest.api.v4.ArtistCatalog;
-import com.echonest.api.v4.ArtistLocation;
-import com.echonest.api.v4.ArtistParams;
-import com.echonest.api.v4.BasicPlaylistParams;
-import com.echonest.api.v4.Biography;
-import com.echonest.api.v4.EchoNestAPI;
-import com.echonest.api.v4.EchoNestException;
-import com.echonest.api.v4.Params;
-import com.echonest.api.v4.Playlist;
-import com.echonest.api.v4.PlaylistParams;
+import com.echonest.api.v4.*;
 import com.echonest.api.v4.PlaylistParams.PlaylistType;
-import com.echonest.api.v4.Song;
-import com.echonest.api.v4.SongCatalog;
-import com.echonest.api.v4.SongCatalogItem;
-import com.echonest.api.v4.SongParams;
-import com.echonest.api.v4.Term;
-import com.echonest.api.v4.TimedEvent;
-import com.echonest.api.v4.Track;
-import com.echonest.api.v4.TrackAnalysis;
-import com.echonest.api.v4.WebDocument;
-import com.echonest.api.v4.YearsActive;
 import com.echonest.api.v4.util.Shell;
 import com.echonest.api.v4.util.ShellCommand;
 import com.echonest.api.v4.util.Utilities;
@@ -153,15 +133,61 @@ public class EchonestDevShell {
 
         shell.add("list_genres", new ShellCommand() {
             public String execute(Shell ci, String[] args) throws Exception {
-                List<String> genres = en.listGenres();
-                for (String genre : genres) {
-                    System.out.println(genre);
+                List<Genre> genres = en.listGenres();
+                for (Genre genre : genres) {
+                    System.out.println(String.format("%s: %s", genre.getName(), genre.getDescription()));
+                    Map<String, String> urls = genre.getUrls();
+                    for (String s : urls.keySet()) {
+                        System.out.println(String.format("\t %s: %s", s, urls.get(s)));
+                    }
                 }
                 return "";
             }
 
             public String getHelp() {
                 return "list available genres";
+            }
+        });
+
+        shell.add("search_genres", new ShellCommand() {
+            public String execute(Shell ci, String[] args) throws Exception {
+                if(args.length < 2) {
+                    System.out.println("You need to provide a search string");
+                }
+                List<Genre> genres = en.searchGenres(args[1]);
+                for (Genre genre : genres) {
+                    System.out.println(String.format("%s: %s", genre.getName(), genre.getDescription()));
+                    Map<String, String> urls = genre.getUrls();
+                    for (String s : urls.keySet()) {
+                        System.out.println(String.format("\t %s: %s", s, urls.get(s)));
+                    }
+                }
+                return "No result find.";
+            }
+
+            public String getHelp() {
+                return "search genres";
+            }
+        });
+
+        shell.add("get_similar_genre", new ShellCommand() {
+            public String execute(Shell ci, String[] args) throws Exception {
+                if(args.length < 2) {
+                    System.out.println("You need to provide a genre name");
+                }
+                List<Genre> genres = en.getSimilarGenres(args[1]);
+                for (Genre genre : genres) {
+                    System.out.println(String.format("%f - %s: %s", genre.getSimilarity(), genre.getName(), genre.getDescription()));
+                    Map<String, String> urls = genre.getUrls();
+                    for (String s : urls.keySet()) {
+                        System.out.println(String.format("\t %s: %s", s, urls.get(s)));
+                    }
+                }
+                return "No result find.";
+            }
+
+            public String getHelp() {
+                return "get similar genres";
             }
         });
 

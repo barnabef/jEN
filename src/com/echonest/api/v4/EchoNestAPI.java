@@ -296,17 +296,47 @@ public class EchoNestAPI {
      * @return a list of terms
      * @throws EchoNestException
      */
-    public List<String> listGenres() throws EchoNestException {
-        List<String> genres = new ArrayList<String>();
+    public List<Genre> listGenres() throws EchoNestException {
+        List<Genre> genres = new ArrayList<Genre>();
         Params p = new Params();
+        p.add("bucket", new String[]{"description", "urls"});
 
-        Map results = cmd.sendCommand("artist/list_genres", p);
+        Map results = cmd.sendCommand("genre/list", p);
         Map response = (Map) results.get("response");
         List list = (List) response.get("genres");
         for (int i = 0; i < list.size(); i++) {
-            Map tmap = (Map) list.get(i);
-            String term = (String) tmap.get("name");
-            genres.add(term);
+            Genre genre = new Genre((Map) list.get(i));
+            genres.add(genre);
+        }
+        return genres;
+    }
+
+    public List<Genre> searchGenres(String searchStr) throws EchoNestException {
+        List<Genre> genres = new ArrayList<Genre>();
+        Params p = new Params();
+        p.add("bucket", new String[]{"description", "urls"});
+        p.add("name", searchStr);
+        Map results = cmd.sendCommand("genre/search", p);
+        Map response = (Map) results.get("response");
+        List list = (List) response.get("genres");
+        for (int i = 0; i < list.size(); i++) {
+            Genre genre = new Genre((Map) list.get(i));
+            genres.add(genre);
+        }
+        return genres;
+    }
+
+    public List<Genre> getSimilarGenres(String searchStr) throws EchoNestException {
+        List<Genre> genres = new ArrayList<Genre>();
+        Params p = new Params();
+        p.add("bucket", new String[]{"description", "urls"});
+        p.add("name", searchStr);
+        Map results = cmd.sendCommand("genre/similar", p);
+        Map response = (Map) results.get("response");
+        List list = (List) response.get("genres");
+        for (int i = 0; i < list.size(); i++) {
+            Genre genre = new Genre((Map) list.get(i));
+            genres.add(genre);
         }
         return genres;
     }
